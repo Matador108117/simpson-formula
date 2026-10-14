@@ -71,6 +71,66 @@ public class Testfile {
     }
 
     @Test
+    public void getsAndSetsAllIntegrationProperties() {
+        SimpsonIntegration integration = new SimpsonIntegration(0.0, 1.1, 9.0, 10);
+        List<Double> xValues = List.of(1.0, 2.0);
+        List<Double> studentValues = List.of(3.0, 4.0);
+        double[] gammaValues = {5.0, 6.0};
+
+        integration.setNumSeg(20);
+        integration.setDblL(-1.0);
+        integration.setDblH(2.0);
+        integration.setDof(12.0);
+        integration.setDblX(xValues);
+        integration.setSecmentsWidth(0.15);
+        integration.setGamma(gammaValues);
+        integration.setC(0.25);
+        integration.setStudentArray(studentValues);
+        integration.setSimsonresult(0.75);
+
+        assertEquals(20, integration.getNumSeg());
+        assertEquals(-1.0, integration.getDblL(), 0.0);
+        assertEquals(2.0, integration.getDblH(), 0.0);
+        assertEquals(12.0, integration.getDof(), 0.0);
+        assertEquals(xValues, integration.getDblX());
+        assertEquals(0.15, integration.getSecmentsWidth(), 0.0);
+        assertEquals(gammaValues, integration.getGamma());
+        assertEquals(0.25, integration.getC(), 0.0);
+        assertEquals(studentValues, integration.getStudentArray());
+        assertEquals(0.75, integration.getSimsonresult(), 0.0);
+    }
+
+    @Test
+    public void calculatesGammaForHalfAndWholeValues() {
+        SimpsonIntegration integration = new SimpsonIntegration(0.0, 1.0, 9.0, 2);
+
+        assertEquals(Math.sqrt(Math.PI), integration.Gamma(0.5), 1e-12);
+        assertEquals(2.0, integration.Gamma(3.0), 1e-12);
+    }
+
+    @Test
+    public void refinesIntegrationWhenInitialDifferenceIsTooLarge() throws Exception {
+        ByteArrayOutputStream capturedOutput = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(capturedOutput));
+
+        new Logic().run(0.0, 1.0, 1.0, 1);
+
+        assertTrue(capturedOutput.toString().contains("The result"));
+        assertTrue(Files.exists(resultsPath));
+    }
+
+    @Test
+    public void stopsRefiningAfterMaximumIterations() throws Exception {
+        ByteArrayOutputStream capturedOutput = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(capturedOutput));
+
+        new Logic().run(0.0, 100.0, 0.01, 1);
+
+        assertTrue(capturedOutput.toString().contains("The result"));
+        assertTrue(Files.exists(resultsPath));
+    }
+
+    @Test
     public void testfor5adocs() throws Exception {
         assertMainResult(new String[] {"0", "1.1", "9", "10"}, "0.35006");
         assertMainResult(new String[] {"0", "1.1812", "10", "10"}, "0.36757");
@@ -92,6 +152,63 @@ public class Testfile {
         assertTrue(contents.contains("Result"));
         assertTrue(contents.contains("0.35006"));
         Files.deleteIfExists(output);
+    }
+
+    @Test
+    public void writesResultFileWithDifferentHeaderAndValueLengths() throws Exception {
+        Path output = Files.createTempFile("a5-test-", ".txt");
+
+        new OutFile().writeResultFile(
+                List.of("first", "second"),
+                output.toString(),
+                List.of("Only header"));
+
+        String contents = Files.readString(output);
+        assertTrue(contents.contains("Only header"));
+        assertTrue(contents.contains("first"));
+        assertTrue(contents.contains("second"));
+        Files.deleteIfExists(output);
+    }
+
+    @Test
+    public void writesResultFileWithMoreHeadersThanValues() throws Exception {
+        Path output = Files.createTempFile("a5-test-", ".txt");
+
+        new OutFile().writeResultFile(
+                List.of("value"),
+                output.toString(),
+                List.of("First header", "Second header"));
+
+        String contents = Files.readString(output);
+        assertTrue(contents.contains("First header"));
+        assertTrue(contents.contains("Second header"));
+        assertTrue(contents.contains("value"));
+        Files.deleteIfExists(output);
+    }
+
+    @Test
+    public void reportsFileWritingErrors() {
+        assertThrows(RuntimeException.class, () -> new OutFile().writeResultFile(
+                List.of("value"),
+                ".",
+                List.of("Result")));
+    }
+
+    @Test
+    public void coversMainConstructor() {
+        assertTrue(new Main() instanceof Main);
+    }
+
+    @Test
+    public void reportsWhenToleranceCannotBeReached() throws Exception {
+        ByteArrayOutputStream capturedOutput = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(capturedOutput));
+
+        new Logic().run(0.0, 1.0, 1000.0, 1);
+
+        assertTrue(capturedOutput.toString().contains(
+                "The result has a tolerance greater than 0.00001"));
+        assertTrue(Files.readString(resultsPath).contains("not reachable"));
     }
 
     private void assertMainResult(String[] arguments, String expectedResult) throws Exception {
