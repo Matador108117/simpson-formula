@@ -30,7 +30,7 @@ public class Logic {
         OutFile out = new OutFile();
         if (diference <= ERROR_FACTOR) {
             String roundedResult = BigDecimal.valueOf(result)
-                    .setScale(5, RoundingMode.HALF_UP)
+                    .setScale(7, RoundingMode.HALF_UP)
                     .toPlainString();
             System.out.println(
                     "The result of the Simpson integration is: " + roundedResult);
