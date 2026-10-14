@@ -146,10 +146,4 @@ public class SimpsonIntegration {
     public void setSimsonresult(double simsonresult) {
         this.simsonresult = simsonresult;
     }
-
-    
-    
-    
-    
-    
 }
