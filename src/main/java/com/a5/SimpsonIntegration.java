@@ -44,33 +44,25 @@ public class SimpsonIntegration {
         return c;
     }
     public List<Double> calculateStudent(){
-        int i = 0;
-        this.studentArray.add(0.0);
-        while (i < this.numSeg) {
-            this.studentArray.add(c * Math.pow((1 + ((this.studentArray.get(i) * this.studentArray.get(i)) / 9)), -5.0));
-            i++;
+        for (int i = 0; i <= this.numSeg; i++) {
+            double x = this.dblL + (i * this.secmentsWidth);
+            double density = this.c * Math.pow(
+                    1.0 + ((x * x) / this.dof),
+                    -(this.dof + 1.0) / 2.0);
+            this.studentArray.add(density);
         }
         return studentArray;
     }
     public double calcualteSimpson(){
-        int i = 0;
-        for (double num : this.studentArray) {
-            if(i == 0){
-                this.simsonresult += 1*num;
-            }
-            if (num == this.studentArray.size()){
-                this.simsonresult += 1*num;
-            }
-            if(num % 2 == 0){
-            this.simsonresult += (2 * num);
-            }
+        this.simsonresult = this.studentArray.get(0)
+                + this.studentArray.get(this.numSeg);
 
-            if (num % 2 != 0){
-                this.simsonresult += (4 * num);
-            }
-            i++;
+        for (int i = 1; i < this.numSeg; i++) {
+            int weight = (i % 2 == 0) ? 2 : 4;
+            this.simsonresult += weight * this.studentArray.get(i);
         }
-        return this.simsonresult;
+
+        return (this.secmentsWidth / 3.0) * this.simsonresult;
     }
     public double calculatesimpsonIntegretion(){
         this.secmentsWidth  = calculateSegmentheight();

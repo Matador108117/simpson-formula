@@ -1,5 +1,7 @@
 package com.a5;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import com.a5.reuse.OutFile;
@@ -13,30 +15,30 @@ public class Logic {
     public void run(double limless, double limhigh, double dof, int numSeg) {
         simp1 = new SimpsonIntegration(limless, limhigh, dof, numSeg);
         simp2 = new SimpsonIntegration(limless, limhigh, dof, (numSeg * 2));
-        double diference = Math.abs(simp1.calculatesimpsonIntegretion() - simp2.calculatesimpsonIntegretion());
+        double result = simp1.calculatesimpsonIntegretion();
+        double finerResult = simp2.calculatesimpsonIntegretion();
+        double diference = Math.abs(result - finerResult);
         int i = 1;
         int numSegduplocate = numSeg * 2;
-        while (diference < ERROR_FACTOR) {
-            if (i == 10) {
-                break;
-            }
+        while (diference > ERROR_FACTOR && i < 10) {
             numSegduplocate *= 2;
-            if (i % 2 == 0) {
-                diference = Math.abs(simp2.recalculate(numSegduplocate) - simp1.getSimsonresult());
-            } else {
-                diference = Math.abs(simp1.recalculate(numSegduplocate) - simp2.getSimsonresult());
-            }
+            result = simp2.recalculate(numSegduplocate);
+            diference = Math.abs(result - finerResult);
+            finerResult = result;
             i++;
         }
         OutFile out = new OutFile();
-        if (i != 10) {
+        if (diference <= ERROR_FACTOR) {
+            String roundedResult = BigDecimal.valueOf(result)
+                    .setScale(5, RoundingMode.HALF_UP)
+                    .toPlainString();
             System.out.println(
-                    "The result for the difetence between the simpson integration and his duplicate is: " + diference);
-            out.writeResultFile(List.of(String.valueOf(diference)), path, List.of("Diference"));
+                    "The result of the Simpson integration is: " + roundedResult);
+            out.writeResultFile(List.of(roundedResult), path, List.of("Result"));
 
         } else {
             System.out.println("The result has a tolerance greater than 0.00001");
-            out.writeResultFile(List.of("not reachable"), path, List.of("Diference"));
+            out.writeResultFile(List.of("not reachable"), path, List.of("Result"));
         }
 
     }
