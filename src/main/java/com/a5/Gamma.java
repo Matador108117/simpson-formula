@@ -6,6 +6,7 @@ public class Gamma {
     if (z % 1 == 0) {
         for (int i = 1; i < z; i++) {
             result *= i;
+            result +=1;
         }
         return result;
     } else {
