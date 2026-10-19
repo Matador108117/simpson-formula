@@ -154,13 +154,13 @@ public class Testfile {
     @Test
     public void calculatesGammaForHalfValue() {
         SimpsonIntegration integration = new SimpsonIntegration(0.0, 1.0, 9.0, 2);
-        assertEquals(Math.sqrt(Math.PI), integration.Gamma(0.5), 1e-12);
+        assertEquals(Math.sqrt(Math.PI), integration.gamma(0.5), 1e-12);
     }
 
     @Test
     public void calculatesGammaForWholeValue() {
         SimpsonIntegration integration = new SimpsonIntegration(0.0, 1.0, 9.0, 2);
-        assertEquals(2.0, integration.Gamma(3.0), 1e-12);
+        assertEquals(2.0, integration.gamma(3.0), 1e-12);
     }
 
     @Test

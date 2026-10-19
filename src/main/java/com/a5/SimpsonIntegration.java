@@ -22,35 +22,17 @@ public class SimpsonIntegration {
         this.dblL = limL;
         this.dblH = limH;
         this.numSeg = numSeg;
-
-
-
     }
-    public double Gamma(double z) {
-    double result = 1.0;
-    while (z > 1.0) {
-        z -= 1.0;
-        result *= z;
+    public double gamma(double z) {
+        return new Gamma().gamma(z);
     }
-    if (Math.abs(z - 0.5) < 1e-10) {
-        result *= Math.sqrt(Math.PI);
-    }
-    return result;
-}
     public double calculateC(){
-           gamma[0] = Gamma((dof + 1.0) / 2.0);
-           gamma[1] = Gamma(dof / 2.0);
-           c = gamma[0] / (Math.sqrt(dof * Math.PI) * gamma[1]);
+           c = new Constant().calculateC(dof, gamma);
         return c;
     }
     public List<Double> calculateStudent(){
-        for (int i = 0; i <= this.numSeg; i++) {
-            double x = this.dblL + (i * this.secmentsWidth);
-            double density = this.c * Math.pow(
-                    1.0 + ((x * x) / this.dof),
-                    -(this.dof + 1.0) / 2.0);
-            this.studentArray.add(density);
-        }
+        this.studentArray = new StudentDerivation().calculateStudent(
+                numSeg, dblL, c, dof, secmentsWidth);
         return studentArray;
     }
     public double calcualteSimpson(){
