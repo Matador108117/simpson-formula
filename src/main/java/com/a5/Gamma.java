@@ -5,7 +5,7 @@ public class Gamma {
     double result = 1.0;
     if (z % 1 == 0) {
         for (int i = 1; i < z; i++) {
-            result *= i;
+            result *= i;    
         }
         return result;
     } else {
